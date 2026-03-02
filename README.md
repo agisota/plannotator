@@ -48,9 +48,6 @@ Plannotator lets you privately share plans, annotations, and feedback with colle
 - Fully open source and self-hostable ([see docs](https://plannotator.ai/docs/guides/sharing-and-collaboration/))
 
 > [!NOTE]
-> [share.plannotator.ai](https://share.plannotator.ai) uses a default fallback (demo) plan that is hard-coded into the site. This isn't a leaked plan — the site has no storage layer.
-
-> [!NOTE]
 > Short links are end-to-end encrypted. A single-use AES-256-GCM key is generated in your browser via the [Web Crypto API](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/generateKey), used to encrypt the plan, and embedded in the URL fragment (`#key=...`). The key never leaves the browser — it is never sent to the paste service or any server. Only someone with the exact URL can decrypt the plan.
 
 ## Install

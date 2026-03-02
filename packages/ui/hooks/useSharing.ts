@@ -133,7 +133,9 @@ export function useSharing(
 
           return true;
         }
-        // Paste fetch failed — fall through to try the hash fragment instead.
+        // Paste fetch failed — short URL path can't fall back to hash parsing
+        // (the hash contains #key=, not plan data).
+        return false;
       }
 
       const payload = await parseShareHash();
@@ -260,7 +262,7 @@ export function useSharing(
       let payload: SharePayload | undefined;
 
       // Check for short URL pattern: /p/<id> with optional #key=<key> fragment
-      const shortMatch = url.match(/\/p\/([A-Za-z0-9]{6,16})(?:#key=([A-Za-z0-9_-]+))?/);
+      const shortMatch = url.match(/\/p\/([A-Za-z0-9]{6,16})(?:#key=([A-Za-z0-9_-]+))?(?:\?|#|$)/);
       if (shortMatch) {
         const pasteId = shortMatch[1];
         const encryptionKey = shortMatch[2]; // undefined if no key fragment
