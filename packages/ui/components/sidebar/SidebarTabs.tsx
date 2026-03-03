@@ -1,7 +1,7 @@
 /**
  * SidebarTabs — Collapsed tab flags
  *
- * When the sidebar is closed, two small vertical tabs protrude from the left edge.
+ * When the sidebar is closed, small vertical tabs protrude from the left edge.
  * Clicking a tab opens the sidebar in that mode.
  */
 

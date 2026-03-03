@@ -449,6 +449,9 @@ const App: React.FC = () => {
     if (enabled) {
       const settings = getObsidianSettings();
       setVaultPath(getEffectiveVaultPath(settings));
+    } else {
+      setVaultPath('');
+      vaultBrowser.setActiveFile(null);
     }
   }, [uiPrefs]); // uiPrefs changes when any settings update
 
