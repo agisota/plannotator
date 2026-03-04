@@ -117,6 +117,7 @@ export const Settings: React.FC<SettingsProps> = ({
   }, [showDialog, availableAgents, origin, getAgentWarning]);
 
   // Fetch detected vaults when Obsidian is enabled
+  // biome-ignore lint/correctness/useExhaustiveDependencies: handleObsidianChange is defined below (TDZ) — called inside async .then() so closure is fine
   useEffect(() => {
     if (obsidian.enabled && detectedVaults.length === 0 && !vaultsLoading) {
       setVaultsLoading(true);
@@ -132,15 +133,7 @@ export const Settings: React.FC<SettingsProps> = ({
         .catch(() => setDetectedVaults([]))
         .finally(() => setVaultsLoading(false));
     }
-  }, [
-    obsidian.enabled,
-    detectedVaults.length,
-    // biome-ignore lint/correctness/useExhaustiveDependencies: handleObsidianChange is defined below but stable
-    // biome-ignore lint/correctness/noInvalidUseBeforeDeclaration: handleObsidianChange is defined below but stable
-    handleObsidianChange,
-    obsidian.vaultPath,
-    vaultsLoading,
-  ]);
+  }, [obsidian.enabled, detectedVaults.length, obsidian.vaultPath, vaultsLoading]);
 
   const handleObsidianChange = (updates: Partial<ObsidianSettings>) => {
     const newSettings = { ...obsidian, ...updates };

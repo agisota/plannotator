@@ -30,9 +30,11 @@ plannotator/
 │       └── vite.config.ts
 ├── packages/
 │   ├── server/                   # Shared server implementation
-│   │   ├── index.ts              # startPlannotatorServer(), handleServerReady()
-│   │   ├── review.ts             # startReviewServer(), handleReviewServerReady()
-│   │   ├── annotate.ts           # startAnnotateServer(), handleAnnotateServerReady()
+│   │   ├── index.ts              # startPlannotatorServer()
+│   │   ├── review.ts             # startReviewServer()
+│   │   ├── annotate.ts           # startAnnotateServer()
+│   │   ├── shared-handlers.ts    # handleServerReady(), image/upload/agents handlers
+│   │   ├── reference-handlers.ts # doc/vault file/vault doc handlers, buildFileTree
 │   │   ├── storage.ts            # Plan saving to disk (getPlanDir, savePlan, etc.)
 │   │   ├── share-url.ts          # Server-side share URL generation for remote sessions
 │   │   ├── remote.ts             # isRemoteSession(), getServerPort()
