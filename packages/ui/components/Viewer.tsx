@@ -484,11 +484,12 @@ export const Viewer = forwardRef<ViewerHandle, ViewerProps>(({
         const source = sources[0];
         const doms = highlighter.getDoms(source.id);
         if (doms?.length > 0) {
-          // Clean up previous pending highlight if exists
+          // Clean up previous pending highlight and dismiss open popover
           if (pendingSourceRef.current) {
             highlighter.remove(pendingSourceRef.current.id);
             pendingSourceRef.current = null;
           }
+          setCommentPopover(null);
 
           if (modeRef.current === 'redline') {
             // Auto-delete in redline mode
@@ -694,14 +695,16 @@ export const Viewer = forwardRef<ViewerHandle, ViewerProps>(({
     setCommentPopover(null);
   };
 
-  const handleCommentClose = () => {
-    if (commentPopover?.source && highlighterRef.current) {
-      highlighterRef.current.remove(commentPopover.source.id);
-      pendingSourceRef.current = null;
-    }
-    setCommentPopover(null);
+  const handleCommentClose = useCallback(() => {
+    setCommentPopover((prev) => {
+      if (prev?.source && highlighterRef.current) {
+        highlighterRef.current.remove(prev.source.id);
+        pendingSourceRef.current = null;
+      }
+      return null;
+    });
     window.getSelection()?.removeAllRanges();
-  };
+  }, []);
 
   return (
     <div className="relative z-50 w-full max-w-[832px] 2xl:max-w-5xl">
