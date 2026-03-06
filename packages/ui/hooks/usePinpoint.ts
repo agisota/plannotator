@@ -47,7 +47,7 @@ export function usePinpoint({
 
     const handleMouseMove = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      const resolved = resolvePinpointTarget(target, container);
+      const resolved = resolvePinpointTarget(target, container, { clientX: e.clientX, clientY: e.clientY });
 
       if (resolved) {
         if (resolved.element !== prevElement) {
@@ -89,7 +89,7 @@ export function usePinpoint({
 
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      const resolved = resolvePinpointTarget(target, container);
+      const resolved = resolvePinpointTarget(target, container, { clientX: e.clientX, clientY: e.clientY });
       if (!resolved) return;
 
       // Prevent link navigation in pinpoint mode

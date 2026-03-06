@@ -837,13 +837,19 @@ export const Viewer = forwardRef<ViewerHandle, ViewerProps>(({
           </button>
         </div>
         {frontmatter && <FrontmatterCard frontmatter={frontmatter} />}
-        {blocks.map(block => (
-          block.type === 'code' && block.language === 'mermaid' ? (
-            <MermaidBlock key={block.id} block={block} />
-          ) : block.type === 'code' ? (
+        {groupBlocks(blocks).map(group =>
+          group.type === 'list-group' ? (
+            <div key={group.key} data-pinpoint-group="list" className="py-1 -mx-2 px-2">
+              {group.blocks.map(block => (
+                <BlockRenderer key={block.id} block={block} onOpenLinkedDoc={onOpenLinkedDoc} />
+              ))}
+            </div>
+          ) : group.block.type === 'code' && group.block.language === 'mermaid' ? (
+            <MermaidBlock key={group.block.id} block={group.block} />
+          ) : group.block.type === 'code' ? (
             <CodeBlock
-              key={block.id}
-              block={block}
+              key={group.block.id}
+              block={group.block}
               onHover={inputMethod === 'pinpoint' ? () => {} : (element) => {
                 // Clear any pending leave timeout
                 if (hoverTimeoutRef.current) {
@@ -854,7 +860,7 @@ export const Viewer = forwardRef<ViewerHandle, ViewerProps>(({
                 setIsCodeBlockToolbarExiting(false);
                 // Only show hover toolbar if no selection toolbar is active
                 if (!toolbarState) {
-                  setHoveredCodeBlock({ block, element });
+                  setHoveredCodeBlock({ block: group.block, element });
                 }
               }}
               onLeave={inputMethod === 'pinpoint' ? () => {} : () => {
@@ -868,12 +874,12 @@ export const Viewer = forwardRef<ViewerHandle, ViewerProps>(({
                   }, 150);
                 }, 100);
               }}
-              isHovered={inputMethod !== 'pinpoint' && hoveredCodeBlock?.block.id === block.id}
+              isHovered={inputMethod !== 'pinpoint' && hoveredCodeBlock?.block.id === group.block.id}
             />
           ) : (
-            <BlockRenderer key={block.id} block={block} onOpenLinkedDoc={onOpenLinkedDoc} />
+            <BlockRenderer key={group.block.id} block={group.block} onOpenLinkedDoc={onOpenLinkedDoc} />
           )
-        ))}
+        )}
 
         {/* Text selection toolbar */}
         {toolbarState && (
@@ -1103,6 +1109,30 @@ const parseTableContent = (content: string): { headers: string[]; rows: string[]
 
   return { headers, rows };
 };
+
+/** Groups consecutive list-item blocks so they can share a pinpoint hover wrapper. */
+type RenderGroup =
+  | { type: 'single'; block: Block }
+  | { type: 'list-group'; blocks: Block[]; key: string };
+
+function groupBlocks(blocks: Block[]): RenderGroup[] {
+  const groups: RenderGroup[] = [];
+  let i = 0;
+  while (i < blocks.length) {
+    if (blocks[i].type === 'list-item') {
+      const listBlocks: Block[] = [];
+      while (i < blocks.length && blocks[i].type === 'list-item') {
+        listBlocks.push(blocks[i]);
+        i++;
+      }
+      groups.push({ type: 'list-group', blocks: listBlocks, key: `list-${listBlocks[0].id}` });
+    } else {
+      groups.push({ type: 'single', block: blocks[i] });
+      i++;
+    }
+  }
+  return groups;
+}
 
 const BlockRenderer: React.FC<{ block: Block; onOpenLinkedDoc?: (path: string) => void }> = ({ block, onOpenLinkedDoc }) => {
   switch (block.type) {

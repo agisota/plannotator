@@ -31,17 +31,32 @@ export interface PinpointTarget {
   isCodeBlock: boolean;
 }
 
+/** Edge-zone threshold for table hover (px). Covers the outermost cell padding
+ *  area (cells have px-3/py-2 = 12px/8px padding) so you need to aim at actual
+ *  text content to target a specific cell. */
+const TABLE_EDGE_ZONE = 22;
+
 /**
  * Given a mousemove/click target element, find the best annotation target
- * within the viewer container.
+ * within the viewer container. Optionally accepts mouse coordinates for
+ * edge-zone detection (tables).
  */
 export function resolvePinpointTarget(
   target: HTMLElement,
   container: HTMLElement,
+  mousePos?: { clientX: number; clientY: number },
 ): PinpointTarget | null {
   // Skip toolbar, buttons, existing annotations
   if (target.closest(SKIP_SELECTORS)) return null;
   if (!container.contains(target)) return null;
+
+  // Group detection: cursor is in the gap/gutter of a list group wrapper
+  const groupEl = target.closest('[data-pinpoint-group]') as HTMLElement | null;
+  if (groupEl && container.contains(groupEl) && !target.closest('[data-block-id]')) {
+    const groupType = groupEl.getAttribute('data-pinpoint-group');
+    const label = groupType === 'list' ? 'list' : groupType === 'blockquote' ? 'blockquote group' : 'group';
+    return { element: groupEl, blockId: '', label, isCodeBlock: false };
+  }
 
   // Find the parent block
   const blockEl = target.closest('[data-block-id]') as HTMLElement | null;
@@ -61,6 +76,30 @@ export function resolvePinpointTarget(
       label: getCodeBlockLabel(blockEl),
       isCodeBlock: true,
     };
+  }
+
+  // Table edge-zone detection: edges target whole table or row
+  const tableEl = blockEl.querySelector('table');
+  if (tableEl && mousePos) {
+    const tableRect = tableEl.getBoundingClientRect();
+    const nearLeft = mousePos.clientX - tableRect.left < TABLE_EDGE_ZONE;
+    const nearRight = tableRect.right - mousePos.clientX < TABLE_EDGE_ZONE;
+    const nearTop = mousePos.clientY - tableRect.top < TABLE_EDGE_ZONE;
+    const nearBottom = tableRect.bottom - mousePos.clientY < TABLE_EDGE_ZONE;
+
+    // Top/bottom edge → whole table
+    if (nearTop || nearBottom) {
+      return { element: blockEl, blockId, label: 'table', isCodeBlock: false };
+    }
+
+    // Left/right edge → the row at this Y position
+    if (nearLeft || nearRight) {
+      const row = findRowAtY(tableEl, mousePos.clientY);
+      if (row) {
+        return { element: row, blockId, label: getRowLabel(row), isCodeBlock: false };
+      }
+      return { element: blockEl, blockId, label: 'table', isCodeBlock: false };
+    }
   }
 
   // Inline code (not inside a code block) — target the <code> element
@@ -89,7 +128,7 @@ export function resolvePinpointTarget(
     }
   }
 
-  // Table cells
+  // Table cells (only reached when cursor is deep inside, not near edge)
   if (CELL_TARGETS.has(target.tagName)) {
     return {
       element: target,
@@ -154,6 +193,7 @@ function getBlockLabel(el: HTMLElement): string {
   const tag = el.tagName.toLowerCase();
   const text = el.textContent?.trim() || '';
 
+  if (el.querySelector('table')) return 'table';
   if (el.dataset.blockType === 'heading' || /^h[1-6]$/.test(tag)) {
     return `heading: "${truncate(text, 35)}"`;
   }
@@ -171,6 +211,28 @@ function getCodeBlockLabel(blockEl: HTMLElement): string {
   const codeEl = blockEl.querySelector('code');
   const lang = codeEl?.className?.match(/language-(\S+)/)?.[1];
   return lang ? `code block (${lang})` : 'code block';
+}
+
+/** Find the table row whose bounding box contains the given Y coordinate */
+function findRowAtY(tableEl: HTMLTableElement, clientY: number): HTMLTableRowElement | null {
+  const rows = tableEl.querySelectorAll('tr');
+  for (const row of rows) {
+    const rect = row.getBoundingClientRect();
+    if (clientY >= rect.top && clientY <= rect.bottom) {
+      return row;
+    }
+  }
+  return null;
+}
+
+/** Human-readable label for a table row */
+function getRowLabel(row: HTMLTableRowElement): string {
+  // Header row
+  if (row.querySelector('th')) return 'table header row';
+  // Body row — use first cell text as hint
+  const firstCell = row.querySelector('td');
+  const text = firstCell?.textContent?.trim() || '';
+  return text ? `row: "${truncate(text, 25)}"` : 'table row';
 }
 
 function truncate(text: string, max: number): string {

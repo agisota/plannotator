@@ -327,6 +327,28 @@ export const CursorOverlay: React.FC<CursorOverlayProps> = ({
   - [x] Integration guide written
   - [ ] Video tutorials recorded
 
+### API Endpoints
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | /api/documents | List all documents | Required |
+| POST | /api/documents | Create new document | Required |
+| GET | /api/documents/:id | Fetch document | Required |
+| PUT | /api/documents/:id | Update document | Owner/Editor |
+| DELETE | /api/documents/:id | Delete document | Owner only |
+| POST | /api/documents/:id/share | Share document | Owner only |
+| GET | /api/documents/:id/collaborators | List collaborators | Required |
+
+### Performance Targets
+
+| Metric | Target | Current | Status |
+|--------|--------|---------|--------|
+| WebSocket latency | < 50ms | 42ms | On track |
+| Time to first cursor | < 200ms | 310ms | **At risk** |
+| Concurrent users/doc | 50 | 25 | In progress |
+| Operation transform | < 5ms | 3ms | On track |
+| Reconnect time | < 2s | 1.8s | On track |
+
 ### Mixed List Styles
 
 * Asterisk item at level 0
