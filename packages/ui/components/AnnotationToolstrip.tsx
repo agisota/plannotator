@@ -158,24 +158,24 @@ export const AnnotationToolstrip: React.FC<AnnotationToolstripProps> = ({
 
 const colorStyles = {
   primary: {
-    active: 'bg-primary text-primary-foreground shadow-sm',
+    active: 'bg-background text-foreground shadow-sm',
     hover: 'text-primary/80 bg-primary/8',
-    inactive: 'text-muted-foreground',
+    inactive: 'text-muted-foreground hover:text-foreground',
   },
   secondary: {
-    active: 'bg-secondary text-secondary-foreground shadow-sm',
+    active: 'bg-background text-foreground shadow-sm',
     hover: 'text-secondary/80 bg-secondary/8',
-    inactive: 'text-muted-foreground',
+    inactive: 'text-muted-foreground hover:text-foreground',
   },
   accent: {
-    active: 'bg-accent text-accent-foreground shadow-sm',
+    active: 'bg-background text-foreground shadow-sm',
     hover: 'text-accent/80 bg-accent/8',
-    inactive: 'text-muted-foreground',
+    inactive: 'text-muted-foreground hover:text-foreground',
   },
   destructive: {
-    active: 'bg-destructive text-destructive-foreground shadow-sm',
+    active: 'bg-background text-foreground shadow-sm',
     hover: 'text-destructive/80 bg-destructive/8',
-    inactive: 'text-muted-foreground',
+    inactive: 'text-muted-foreground hover:text-foreground',
   },
 } as const;
 
@@ -184,8 +184,8 @@ type ButtonColor = keyof typeof colorStyles;
 /* ─── Constants ─── */
 
 const ICON_SIZE = 28;       // collapsed button width (px)
-const H_PAD = 8;            // horizontal padding when expanded (px)
-const GAP = 6;              // gap between icon and label (px)
+const H_PAD = 10;           // horizontal padding when expanded (px) — matches px-2.5
+const GAP = 6;              // gap between icon and label (px) — matches gap-1.5
 const ICON_INNER = 14;      // icon element width (px)
 const DURATION = 180;       // transition ms
 
@@ -244,7 +244,7 @@ const ToolstripButton: React.FC<{
       >
         {icon}
         <span
-          className="text-[11px] font-medium"
+          className="text-xs font-medium"
           style={{
             opacity: expanded ? 1 : 0,
             transition: mounted ? `opacity ${expanded ? DURATION : DURATION * 0.6}ms ease ${expanded ? '60ms' : '0ms'}` : 'none',
@@ -257,7 +257,7 @@ const ToolstripButton: React.FC<{
       {/* Hidden measurement span — rendered offscreen to get label pixel width */}
       <span
         ref={measureRef}
-        className="text-[11px] font-medium absolute pointer-events-none"
+        className="text-xs font-medium absolute pointer-events-none"
         style={{ visibility: 'hidden', position: 'absolute', left: -9999 }}
         aria-hidden
       >
