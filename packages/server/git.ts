@@ -176,7 +176,7 @@ async function getUntrackedFileDiffs(srcPrefix = 'a/', dstPrefix = 'b/', cwd?: s
  * Parse a worktree diff type like `worktree:/path:last-commit` into path + sub-type.
  * Falls back to `uncommitted` if no sub-type suffix (backwards compatible).
  */
-const WORKTREE_SUB_TYPES = new Set(["uncommitted", "last-commit", "branch"]);
+const WORKTREE_SUB_TYPES = new Set(["uncommitted", "staged", "unstaged", "last-commit", "branch"]);
 
 export function parseWorktreeDiffType(diffType: string): { path: string; subType: string } | null {
   if (!diffType.startsWith("worktree:")) return null;
@@ -229,6 +229,17 @@ export async function runGitDiff(
             patch = (await $`git diff --root HEAD --src-prefix=a/ --dst-prefix=b/`.quiet().cwd(wtPath)).text();
           }
           label = "Last commit";
+          break;
+        }
+        case "staged":
+          patch = (await $`git diff --staged --src-prefix=a/ --dst-prefix=b/`.quiet().cwd(wtPath)).text();
+          label = "Staged changes";
+          break;
+        case "unstaged": {
+          const trackedDiff = (await $`git diff --src-prefix=a/ --dst-prefix=b/`.quiet().cwd(wtPath)).text();
+          const untrackedDiff = await getUntrackedFileDiffs('a/', 'b/', wtPath);
+          patch = trackedDiff + untrackedDiff;
+          label = "Unstaged changes";
           break;
         }
         case "branch":

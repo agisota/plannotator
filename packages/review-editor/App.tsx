@@ -353,7 +353,7 @@ const ReviewApp: React.FC = () => {
       const lastColon = rest.lastIndexOf(':');
       if (lastColon !== -1) {
         const sub = rest.slice(lastColon + 1);
-        if (['uncommitted', 'last-commit', 'branch'].includes(sub)) {
+        if (['uncommitted', 'staged', 'unstaged', 'last-commit', 'branch'].includes(sub)) {
           return { activeWorktreePath: rest.slice(0, lastColon), activeDiffBase: sub };
         }
       }
@@ -854,6 +854,7 @@ const ReviewApp: React.FC = () => {
                 isStaging={stagingFile === activeFile.path}
                 onStage={() => stageFile(activeFile.path)}
                 canStage={canStageFiles}
+                stageError={stageError}
               />
             ) : (
               <div className="h-full flex items-center justify-center">

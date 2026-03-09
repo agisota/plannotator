@@ -29,6 +29,7 @@ interface DiffViewerProps {
   isStaging?: boolean;
   onStage?: () => void;
   canStage?: boolean;
+  stageError?: string | null;
 }
 
 export const DiffViewer: React.FC<DiffViewerProps> = ({
@@ -50,6 +51,7 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({
   isStaging = false,
   onStage,
   canStage = false,
+  stageError,
 }) => {
   const { theme } = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -192,6 +194,7 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({
         isStaging={isStaging}
         onStage={onStage}
         canStage={canStage}
+        stageError={stageError}
       />
 
       <div className="p-4">

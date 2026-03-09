@@ -9,6 +9,7 @@ interface FileHeaderProps {
   isStaging?: boolean;
   onStage?: () => void;
   canStage?: boolean;
+  stageError?: string | null;
 }
 
 /** Sticky file header with file path, Viewed toggle, Git Add, and Copy Diff button */
@@ -21,6 +22,7 @@ export const FileHeader: React.FC<FileHeaderProps> = ({
   isStaging = false,
   onStage,
   canStage = false,
+  stageError,
 }) => {
   const [copied, setCopied] = useState(false);
 
@@ -79,6 +81,9 @@ export const FileHeader: React.FC<FileHeaderProps> = ({
             )}
             {isStaging ? 'Adding...' : isStaged ? 'Added' : 'Git Add'}
           </button>
+        )}
+        {stageError && (
+          <span className="text-xs text-destructive">{stageError}</span>
         )}
         <button
           onClick={async () => {
