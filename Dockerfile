@@ -1,7 +1,7 @@
 FROM oven/bun:latest
 
 # Install Tailscale
-curl -fsSL https://tailscale.com/install.sh | sh
+RUN curl -fsSL https://tailscale.com/install.sh | sh
 
 WORKDIR /app
 
